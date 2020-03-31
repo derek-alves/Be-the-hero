@@ -1,7 +1,7 @@
 import React from 'react';
 import {Feather} from '@expo/vector-icons';
 import logoImg from '../../assets/logo.png';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import { View ,Image,Text, TouchableOpacity, Linking}from'react-native';
 import styles from './style';
 import * as MailComposer from 'expo-mail-composer';
@@ -10,8 +10,15 @@ import * as MailComposer from 'expo-mail-composer';
 
 export default function Detail(){
 
+    const route = useRoute();
+    const incident = route.params.incident;
+
     const navigation = useNavigation();
-    message = 'Olá APAD, estou entrando em contato pois gostaria de ajudar no caso "Cadelinha atropelada" com o valor de R$ 120,00';
+    message = `Olá ${incident.name}, estou entrando em contato pois gostaria de ajudar no caso "${incident.title}" com o valor de R$${Intl.NumberFormat('pt-BR', {
+        sylte:'currency',
+        currency:'BRL'
+    }).format(incident.value)}!`;
+
 
     function navigateBack(){
         navigation.goBack();
@@ -19,15 +26,15 @@ export default function Detail(){
 
     function sendMail(){
         MailComposer.composeAsync({
-            subject:'Herói do caso: Cadelinha atropelada',
-            recipients:['derek@hotmail.com'],
+            subject:`Herói do caso: ${incident.title}`,
+            recipients:[incident.email],
             body:message
 
         })
     }
 
     function sendWhatsapp(){
-        Linking.openURL(`whatsapp://send?phone=5512935000103&text=${message}`);
+        Linking.openURL(`whatsapp://send?phone=${incident.whatsapp}&text=${message}`);
     }
 
     return (
@@ -43,7 +50,7 @@ export default function Detail(){
             <View style={styles.incident}>
             <Text style={[styles.incidentProperty,{marginTop:0}]}>ONG!</Text>
                     <Text style={styles.incidentValue}>
-                        APAD
+                      {incident.name} de {incident.city}/{incident.uf}
                     </Text>
                     
                     <Text style={styles.incidentProperty}>
@@ -51,7 +58,7 @@ export default function Detail(){
                     </Text>
 
                     <Text style={styles.incidentValue}>
-                        Cadelinha atropelada
+                        {incident.description}
                     </Text>
 
                     <Text style={styles.incidentProperty}>
@@ -59,7 +66,10 @@ export default function Detail(){
                     </Text>
                     
                     <Text style={styles.incidentValue}>
-                        R$ 120,00
+                        {Intl.NumberFormat('pt-BR', {
+                            sylte:'currency',
+                            currency:'BRL'
+                        }).format(incident.value)}
                     </Text>
             </View>
 
